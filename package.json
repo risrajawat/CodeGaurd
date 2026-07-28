@@ -1,0 +1,60 @@
+{
+  "name": "codeguard",
+  "displayName": "CodeGuard",
+  "description": "AI-powered VS Code extension to review projects, fix code issues, and generate review summaries.",
+  "publisher": "rishabhsingh",
+  "icon": "images/icon.png",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onCommand:codeguard.reviewProject"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "codeguard.reviewProject",
+        "title": "CodeGuard: Review Project"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "codeguard.reviewProject",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "CodeGuard",
+      "properties": {
+        "codeguard.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "markdownDescription": "Enter your Google Gemini API Key."
+        },
+        "codeguard.model": {
+          "type": "string",
+          "default": "gemini-3.6-flash",
+          "description": "Gemini model used for code review."
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@google/genai": "^2.13.0",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "vscode": "^1.1.37"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0"
+  }
+}
