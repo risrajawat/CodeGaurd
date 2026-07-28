@@ -1,12 +1,16 @@
 {
-  "name": "codeguard",
-  "displayName": "CodeGuard",
+  "name": "codeguard-ai-scanning",
+  "displayName": "CodeGuard ai-scanning",
   "description": "AI-powered VS Code extension to review projects, fix code issues, and generate review summaries.",
-  "publisher": "rishabhsingh",
+  "publisher": "rsdevtools",
   "icon": "images/icon.png",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.85.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/risrajawat/CodeGaurd"
   },
   "categories": [
     "Other"
@@ -51,10 +55,10 @@
   "dependencies": {
     "@google/genai": "^2.13.0",
     "fs": "^0.0.1-security",
-    "path": "^0.12.7",
-    "vscode": "^1.1.37"
+    "path": "^0.12.7"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0"
+    "@types/vscode": "^1.85.0",
+    "vscode": "^1.1.37"
   }
 }
