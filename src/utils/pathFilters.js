@@ -8,40 +8,56 @@ const IGNORED_FOLDERS = [
   ".git",
   "dist",
   "build",
+  "out",
   ".next",
   "coverage",
+  ".codeguard",
+  ".vscode-test",
 ];
 
-function isIgnorePath(filePath) {
-  const folders = filePath.split(path.sep);
+const MAX_FILES = 300;
 
-  return folders.some((folder) => IGNORED_FOLDERS.includes(folder));
+// Checks a path RELATIVE to the project root (so a project that lives inside a
+// folder called "build" is not ignored by accident).
+function isIgnoredRelPath(relPath) {
+  return relPath.split(path.sep).some((folder) => IGNORED_FOLDERS.includes(folder));
 }
 
 function isSupportedFile(filePath) {
   return SUPPORTED_EXTENSIONS.includes(path.extname(filePath));
 }
 
-function scanDirectory(rootDirectory) {
+// Test files are read-only for the agent: it must fix the source, not the tests.
+function isTestFile(relPath) {
+  const norm = relPath.split(path.sep).join("/");
+  return (
+    /(^|\/)(test|tests|__tests__)\//i.test(norm) ||
+    /\.(test|spec)\.[cm]?[jt]sx?$/i.test(norm)
+  );
+}
+
+function scanDirectory(root, startDirectory = root) {
   const files = [];
+  let truncated = false;
 
   function walk(currentDirectory) {
     let entries;
-
     try {
-      entries = fs.readdirSync(currentDirectory, {
-        withFileTypes: true,
-      });
+      entries = fs.readdirSync(currentDirectory, { withFileTypes: true });
     } catch {
       return;
     }
 
     for (const entry of entries) {
-      const fullPath = path.join(currentDirectory, entry.name);
-
-      if (isIgnorePath(fullPath)) {
-        continue;
+      if (files.length >= MAX_FILES) {
+        truncated = true;
+        return;
       }
+
+      const fullPath = path.join(currentDirectory, entry.name);
+      const rel = path.relative(root, fullPath);
+
+      if (isIgnoredRelPath(rel)) continue;
 
       if (entry.isDirectory()) {
         walk(fullPath);
@@ -49,20 +65,21 @@ function scanDirectory(rootDirectory) {
       }
 
       if (entry.isFile() && isSupportedFile(fullPath)) {
-        files.push(fullPath);
+        files.push(rel.split(path.sep).join("/"));
       }
     }
   }
 
-  walk(rootDirectory);
-
-  return files;
+  walk(startDirectory);
+  return { files, truncated };
 }
 
 module.exports = {
-  isIgnorePath,
+  isIgnoredRelPath,
   isSupportedFile,
+  isTestFile,
   scanDirectory,
   IGNORED_FOLDERS,
   SUPPORTED_EXTENSIONS,
+  MAX_FILES,
 };
