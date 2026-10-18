@@ -1,26 +1,20 @@
-const { Type } = require("@google/genai");
-const { readFileSafe } = require("../utils/fileSystem");
+const { readFileSafe, resolveInRoot } = require("../utils/fileSystem");
 
-// Tool declaration for Gemini
 const declaration = {
-    name: "read_file",
-    description: "Reads the content of a file.",
-    parameters: {
-        type: Type.OBJECT,
-        properties: {
-            filePath: {
-                type: Type.STRING,
-                description: "Path of the file to read.",
-            },
-        },
-        required: ["filePath"],
+  name: "read_file",
+  description: "Reads the full content of a file. Path is relative to the project root.",
+  parameters: {
+    type: "object",
+    properties: {
+      filePath: { type: "string", description: "Path of the file to read, e.g. src/app.js" },
     },
+    required: ["filePath"],
+  },
 };
 
-async function readFile({filePath}){
-    const content = readFileSafe({filePath});
-
-    return {content};
+async function run({ filePath } = {}, session) {
+  const abs = resolveInRoot(session.root, filePath);
+  return { content: readFileSafe(abs) };
 }
 
-module.exports = {declaration, readFile};
+module.exports = { declaration, run };
